@@ -1,0 +1,113 @@
+<html>
+<head>
+	<title>Index</title>
+</head>
+<body style="background-color: #121731">
+
+	<div class='container' id='container' style='width:1550px; height:950px; background-color:none; position: absolute; top:0; bottom:0; left:0; right:0; margin:auto; '></div>
+
+	<script src='https://d3js.org/d3.v5.min.js'></script>
+
+	<script>
+
+	window.onresize = updateMargins
+
+	var boxSize = 60
+	var circleSize = 50
+	var strokeCircle = 5
+	var circlesNumber = 375
+	var rows = 15
+	var marginTop, marginLeft
+
+	updateMargins()
+
+	var svg = d3.select('#container').append('svg')
+		.attr('width',1500)
+		.attr('height',900)
+		.on('mousemove', function() {movement()});
+
+
+	for (var i=0;i<circlesNumber; i++)
+	{
+	var transX = Math.floor(i/rows)*boxSize + (boxSize/2)
+	var transY = (i%rows*boxSize) + (boxSize/2)
+
+	var group = svg.append('g')
+		.attr('transform','translate('+ transX + ',' +transY +')')
+
+	group.append('circle')
+		.attr('cx',0)
+		.attr('cy',0)
+		.attr('r',circleSize/2)
+		.attr('fill','none')
+		.attr('stroke','#ff706d')
+		.attr('opacity',0.1)
+
+	var arc = d3.arc()
+    	.innerRadius(circleSize/2-strokeCircle/2)
+    	.outerRadius(circleSize/2+strokeCircle/2)
+    	.startAngle(0.25 * Math.PI)
+    	.endAngle(.75 * Math.PI);
+
+	group.append('path')
+    	.attr('class', 'arc')
+    	.attr('id','arc_'+i)
+    	.attr('d', arc)
+    	.attr('fill','#ff706d')
+
+	}
+
+    function movement()
+    {
+    	var mouseX = d3.event.pageX-marginLeft
+    	var mouseY = d3.event.pageY-marginTop
+      	var mousePoint = {X: mouseX, Y:mouseY}
+      	
+      	for (var p=0;p<circlesNumber;p++)
+      	{
+      		var circlePoint = {X: Math.floor(p/rows)*boxSize + (boxSize/2), Y:(p%rows*boxSize) + (boxSize/2)}
+    		var angle = getAngleFromPoint(mousePoint, circlePoint)
+    		var distance = getDistance(mousePoint, circlePoint)
+      		d3.select('#arc_'+p).attr('transform','rotate('+(angle)+')').attr('opacity',1-distance/1000)
+      	}
+    }
+
+    /* -------------------
+    functions from Sten Hougaard https://codepen.io/netsi1964/pen/WrRGoo
+    ------------------- */
+
+    function getAngleFromPoint(point, centerPoint) 
+    {
+	var dy = (point.Y - centerPoint.Y),
+		dx = (point.X - centerPoint.X);
+	var theta = Math.atan2(dy, dx);
+	var angle = (((theta * 180) / Math.PI)) % 360;
+	angle = (angle<0) ? 360+angle : angle;
+	return angle;
+	}
+
+	function getDistance( point1, point2 )
+	{
+	  var xs = 0;
+	  var ys = 0;
+	 
+	  xs = point2.X - point1.X;
+	  xs = xs * xs;
+	 
+	  ys = point2.Y - point1.Y;
+	  ys = ys * ys;
+	 
+	  return Math.sqrt( xs + ys );
+	}
+
+	function updateMargins()
+	{
+		marginTop = parseInt(window.getComputedStyle(document.getElementById("container")).marginTop)
+		marginLeft = parseInt(window.getComputedStyle(document.getElementById("container")).marginLeft)
+	}
+
+	</script>
+
+
+</body>
+</html>
